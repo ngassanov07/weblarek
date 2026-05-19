@@ -188,3 +188,7 @@ interface IOrder extends IBuyer {
 `setPreview(item: IProduct | null): void` - сохраняет выбранный товар для подробного просмотра.
 `getPreview(): IProduct | null` - возвращает выбранный товар для подробного просмотра.
 `clearPreview(): void` - сбрасывает выбранный товар для подробного просмотра.
+
+
+
+*https://github.com/ngassanov07/weblarek.git*
