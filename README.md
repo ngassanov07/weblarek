@@ -152,3 +152,5 @@ Presenter - слой логики, связывает данные и предс
 Методы:
 - `getProducts(): Promise<{ total: number; items: IProduct[] }>`
 - `createOrder(order: IOrder): Promise<{ id: string; total: number }>`
+
+**https://github.com/ngassanov07/weblarek.git**
