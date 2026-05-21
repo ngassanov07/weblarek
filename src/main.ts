@@ -5,8 +5,8 @@ import { Buyer } from './components/models/Buyer';
 import { LarekApi } from './components/models/LarekApi';
 import { Products } from './components/models/Products';
 import { IProduct } from './types';
-import { apiProducts } from './utils/data';
 import { API_URL } from './utils/constants';
+import { apiProducts } from './utils/data';
 
 const products = new Products();
 const basket = new Basket();

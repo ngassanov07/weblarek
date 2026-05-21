@@ -1,4 +1,5 @@
-export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE'
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+
 export interface IApi {
     get<T extends object>(uri: string): Promise<T>;
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
@@ -16,7 +17,7 @@ export interface IProduct {
 }
 
 export interface IProducts {
-    setItems(item: IProduct[]): void;
+    setItems(items: IProduct[]): void;
     getItems(): IProduct[];
     getItem(id: string): IProduct | undefined;
     setPreview(item: IProduct): void;
@@ -26,7 +27,7 @@ export interface IProducts {
 export interface IBasket {
     getItems(): IProduct[];
     addItem(item: IProduct): void;
-    removeItem(itme: IProduct): void;
+    removeItem(item: IProduct): void;
     clear(): void;
     getTotal(): number;
     getCount(): number;
