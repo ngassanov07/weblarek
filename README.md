@@ -84,12 +84,25 @@ Presenter - слой логики, связывает данные и предс
 - `category: string`
 - `price: number | null`
 
-`IOrder` - интерфейс заказа:
+`IBuyer` - интерфейс данных покупателя:
 - `payment: TPayment`
 - `email: string`
 - `phone: string`
 - `address: string`
+
+`ValidationErrors` - тип объекта ошибок валидации. Построен на основе полей `IBuyer`, поэтому автоматически остается связанным с типом покупателя.
+
+`IOrder` - интерфейс заказа:
+- все поля `IBuyer`
 - `items: string[]`
+- `total: number`
+
+`IProductsResponse` - интерфейс ответа сервера с каталогом товаров:
+- `total: number`
+- `items: IProduct[]`
+
+`IOrderResponse` - интерфейс ответа сервера после оформления заказа:
+- `id: string`
 - `total: number`
 
 ## Модели данных
@@ -126,15 +139,15 @@ Presenter - слой логики, связывает данные и предс
 
 Хранит товары, добавленные в корзину.
 
-### Интерфейс IBuyer
+### Интерфейс IBuyerModel
 
 Описывает модель данных покупателя.
 
 Методы:
-- `setData(data: Partial<Pick<IOrder, 'payment' | 'email' | 'phone' | 'address'>>): void`
-- `getData(): Partial<Pick<IOrder, 'payment' | 'email' | 'phone' | 'address'>>`
+- `setData(data: Partial<IBuyer>): void`
+- `getData(): Partial<IBuyer>`
 - `clear(): void`
-- `validate(): Partial<Record<'payment' | 'email' | 'phone' | 'address', string>>`
+- `validate(): ValidationErrors`
 
 ### Класс Buyer
 
@@ -150,7 +163,7 @@ Presenter - слой логики, связывает данные и предс
 `constructor(api: IApi)`
 
 Методы:
-- `getProducts(): Promise<{ total: number; items: IProduct[] }>`
-- `createOrder(order: IOrder): Promise<{ id: string; total: number }>`
+- `getProducts(): Promise<IProductsResponse>`
+- `createOrder(order: IOrder): Promise<IOrderResponse>`
 
 **https://github.com/ngassanov07/weblarek.git**

@@ -1,34 +1,35 @@
-import { IBuyer, IOrder } from '../../types';
+import { IBuyer, IBuyerModel, ValidationErrors } from '../../types';
 
-export class Buyer implements IBuyer {
-    protected data: Partial<Pick<IOrder, 'payment' | 'email' | 'phone' | 'address'>> = {};
+export class Buyer implements IBuyerModel {
+    protected data: Partial<IBuyer> = {};
 
-    setData(data: Partial<Pick<IOrder, 'payment' | 'email' | 'phone' | 'address'>>): void {
+    setData(data: Partial<IBuyer>): void {
         this.data = {
             ...this.data,
             ...data,
         };
     }
-    getData(): Partial<Pick<IOrder, 'payment' | 'email' | 'phone' | 'address'>> {
+    getData(): Partial<IBuyer> {
         return { ...this.data };
     }
     clear(): void {
         this.data = {};
     }
-    validate(): Partial<Record<'payment' | 'email' | 'phone' | 'address', string>> {
-        const errors: Partial<Record<'payment' | 'email' | 'phone' | 'address', string>> = {};
+
+    validate(): ValidationErrors {
+        const errors: ValidationErrors = {};
 
         if (!this.data.payment) {
             errors.payment = 'Не выбран вид оплаты';
         }
-        if (!this.data.email) {
-            errors.payment = 'Укажите адрес доставки';
+        if (!this.data.address?.trim()) {
+            errors.address = 'Укажите адрес доставки';
         }
-        if (!this.data.phone) {
-            errors.payment = 'Укажите email';
+        if (!this.data.email?.trim()) {
+            errors.email = 'Укажите email';
         }
-        if (!this.data.address) {
-            errors.payment = 'Укажите телефон';
+        if (!this.data.phone?.trim()) {
+            errors.phone = 'Укажите телефон';
         }
 
         return errors;

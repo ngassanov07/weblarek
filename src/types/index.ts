@@ -16,6 +16,15 @@ export interface IProduct {
     price: number | null;
 }
 
+export interface IBuyer {
+    payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
+}
+
+export type ValidationErrors = Partial<Record<keyof IBuyer, string>>;
+
 export interface IProducts {
     setItems(items: IProduct[]): void;
     getItems(): IProduct[];
@@ -34,18 +43,24 @@ export interface IBasket {
     hasItem(id: string): boolean;
 }
 
-export interface IBuyer {
-    setData(data: Partial<Pick<IOrder, 'payment' | 'email' | 'phone' | 'address'>>): void;
-    getData(): Partial<Pick<IOrder, 'payment' | 'email' | 'phone' | 'address'>>;
+export interface IBuyerModel {
+    setData(data: Partial<IBuyer>): void;
+    getData(): Partial<IBuyer>;
     clear(): void;
-    validate(): Partial<Record<'payment' | 'email' | 'phone' | 'address', string>>;
+    validate(): ValidationErrors;
 }
 
-export interface IOrder {
-    payment: TPayment;
-    email: string;
-    phone: string;
-    address: string;
+export interface IOrder extends IBuyer {
     items: string[];
+    total: number;
+}
+
+export interface IProductsResponse {
+    total: number;
+    items: IProduct[];
+}
+
+export interface IOrderResponse {
+    id: string;
     total: number;
 }
