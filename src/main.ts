@@ -8,7 +8,6 @@ import { EventEmitter } from './components/base/Events';
 import { IProduct, IBuyer, ValidationErrors } from './types';
 import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
-import { ensureElement } from './utils/utils';
 
 // View components
 import { Gallery } from './components/view/Gallery';
@@ -21,17 +20,17 @@ import { ContactsForm } from './components/view/ContactsForm';
 import { Success } from './components/view/Success';
 import { Header } from './components/view/Header';
 
+// Events
+const events = new EventEmitter();
+
 // Models
-const products = new Products();
-const basket = new Basket();
-const buyer = new Buyer();
+const products = new Products(events);
+const basket = new Basket(events);
+const buyer = new Buyer(events);
 
 // API
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
-
-// Events
-const events = new EventEmitter();
 
 // View
 const gallery = new Gallery();
@@ -47,7 +46,7 @@ let currentStep: 'order' | 'contacts' = 'order';
 
 // Presenter logic
 
-// Load products
+// Load products from server
 larekApi
     .getProducts()
     .then((response) => {
@@ -63,13 +62,12 @@ events.on('products:changed', () => {
         (product) =>
             new Card('#card-catalog', () => {
                 products.setPreview(product);
-                events.emit('preview:changed');
             }).render(product)
     );
     gallery.render(items);
 });
 
-// Show product preview
+// Show product preview modal
 events.on('preview:changed', () => {
     const product = products.getPreview();
     if (product) {
@@ -82,7 +80,7 @@ events.on('preview:changed', () => {
             modal.close();
         });
 
-        // Update button text
+        // Update button based on product state
         const isInBasket = basket.hasItem(product.id);
         if (product.price === null) {
             card.buttonDisabled = true;
@@ -98,7 +96,7 @@ events.on('preview:changed', () => {
     }
 });
 
-// Update basket when items change
+// Update header counter when basket changes
 events.on('basket:changed', () => {
     header.render({ counter: basket.getCount() });
 });
@@ -116,22 +114,24 @@ events.on('basket:open', () => {
     modal.open();
 });
 
-// Remove item from basket
+// Remove item from basket (from basket view)
 events.on<{ id: string }>('basket:remove', ({ id }) => {
     const product = products.getItem(id);
     if (product) {
         basket.removeItem(product);
+        // Re-render basket
+        events.emit('basket:open');
     }
 });
 
-// Open checkout
+// Open checkout form
 events.on('basket:order', () => {
     currentStep = 'order';
     modal.render(orderForm.render());
     modal.open();
 });
 
-// Handle form changes
+// Handle form input changes and validation
 events.on<{ field: string; value: string; form: string }>(
     'form:change',
     ({ field, value, form }) => {
@@ -155,9 +155,11 @@ events.on<{ field: string; value: string; form: string }>(
 // Handle form submission
 events.on<{ form: string }>('form:submit', ({ form }) => {
     if (form === 'order') {
+        // Move to next step - contacts form
         currentStep = 'contacts';
         modal.render(contactsForm.render());
     } else if (form === 'contacts') {
+        // Submit order to server
         const data = buyer.getData();
         const order = {
             ...data,
@@ -168,8 +170,11 @@ events.on<{ form: string }>('form:submit', ({ form }) => {
         larekApi
             .createOrder(order as any)
             .then(() => {
+                // Show success modal
                 const success = new Success('#success', events);
                 modal.render(success.render({ total: basket.getTotal() }));
+                
+                // Clear basket and buyer data
                 basket.clear();
                 buyer.clear();
             })
@@ -179,13 +184,15 @@ events.on<{ form: string }>('form:submit', ({ form }) => {
     }
 });
 
-// Close success modal
+// Close success modal and reset state
 events.on('success:close', () => {
     modal.close();
     header.render({ counter: basket.getCount() });
+    products.setPreview(null);
+    currentStep = 'order';
 });
 
-// Modal close event
+// Handle modal close
 events.on('modal:close', () => {
     products.setPreview(null);
     currentStep = 'order';
