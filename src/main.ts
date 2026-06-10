@@ -37,12 +37,11 @@ const gallery = new Gallery();
 const modal = new Modal('#modal-container', events);
 const header = new Header('.header', events);
 const basketView = new BasketView('#basket', events);
-const orderForm = new OrderForm('#order', events);
-const contactsForm = new ContactsForm('#contacts', events);
-const successModal = new Success('#success', events);
 
 // State
 let currentStep: 'order' | 'contacts' = 'order';
+let orderForm: OrderForm;
+let contactsForm: ContactsForm;
 
 // Presenter logic
 
@@ -131,6 +130,8 @@ events.on<{ id: string }>('basket:remove', ({ id }) => {
 // Open checkout form
 events.on('basket:order', () => {
     currentStep = 'order';
+    // Create form only when needed
+    orderForm = new OrderForm('#order', events);
     modal.render(orderForm.render());
     modal.open();
 });
@@ -146,10 +147,10 @@ events.on<{ field: string; value: string; form: string }>(
         }
 
         const errors = buyer.validate();
-        if (form === 'order') {
+        if (form === 'order' && orderForm) {
             orderForm.errors = errors as ValidationErrors;
             orderForm.submitDisabled = !!(errors.address || errors.payment);
-        } else if (form === 'contacts') {
+        } else if (form === 'contacts' && contactsForm) {
             contactsForm.errors = errors as ValidationErrors;
             contactsForm.submitDisabled = !!(errors.email || errors.phone);
         }
@@ -161,6 +162,8 @@ events.on<{ form: string }>('form:submit', ({ form }) => {
     if (form === 'order') {
         // Move to next step - contacts form
         currentStep = 'contacts';
+        // Create form only when needed
+        contactsForm = new ContactsForm('#contacts', events);
         modal.render(contactsForm.render());
     } else if (form === 'contacts') {
         // Submit order to server
