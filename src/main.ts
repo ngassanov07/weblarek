@@ -46,14 +46,18 @@ let currentStep: 'order' | 'contacts' = 'order';
 
 // Presenter logic
 
-// Load products from server
+// Initial render with test data
+products.setItems(apiProducts.items);
+header.render({ counter: 0 });
+
+// Try to load products from server
 larekApi
     .getProducts()
     .then((response) => {
         products.setItems(response.items);
     })
     .catch((error: unknown) => {
-        console.error('Error loading products:', error);
+        console.error('Error loading products from API, using test data:', error);
     });
 
 // Update gallery when products change
@@ -197,7 +201,3 @@ events.on('modal:close', () => {
     products.setPreview(null);
     currentStep = 'order';
 });
-
-// Initial render
-products.setItems(apiProducts.items);
-header.render({ counter: 0 });
