@@ -1,33 +1,27 @@
 import { IProduct, IProducts } from "../../types";
-import { EventEmitter } from "../base/Events";
+import { IEvents } from "../base/Events";
+import { EVENT_CATALOG_CHANGE, EVENT_PREVIEW_CHANGE } from "../../utils/events";
 
 export class Products implements IProducts {
     protected items: IProduct[] = [];
     protected preview: IProduct | null = null;
-    protected events: EventEmitter;
 
-    constructor(events: EventEmitter) {
-        this.events = events;
-    }
+    constructor(protected readonly events: IEvents) {}
 
     setItems(items: IProduct[]): void {
         this.items = [...items];
-        this.events.emit('products:changed');
+        this.events.emit(EVENT_CATALOG_CHANGE, { items: this.items });
     }
-
     getItems(): IProduct[] {
         return this.items;
     }
-
     getItem(id: string): IProduct | undefined {
         return this.items.find((item) => item.id === id);
     }
-
-    setPreview(item: IProduct | null): void {
+    setPreview(item: IProduct): void {
         this.preview = item;
-        this.events.emit('preview:changed');
+        this.events.emit(EVENT_PREVIEW_CHANGE, { preview: this.preview });
     }
-
     getPreview(): IProduct | null {
         return this.preview;
     }

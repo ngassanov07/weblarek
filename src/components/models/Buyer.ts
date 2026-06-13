@@ -1,29 +1,25 @@
 import { IBuyer, IBuyerModel, ValidationErrors } from '../../types';
-import { EventEmitter } from "../base/Events";
+import { IEvents } from '../base/Events';
+import { EVENT_BUYER_CHANGE } from '../../utils/events';
 
 export class Buyer implements IBuyerModel {
     protected data: Partial<IBuyer> = {};
-    protected events: EventEmitter;
 
-    constructor(events: EventEmitter) {
-        this.events = events;
-    }
+    constructor(protected readonly events: IEvents) {}
 
     setData(data: Partial<IBuyer>): void {
         this.data = {
             ...this.data,
             ...data,
         };
-        this.events.emit('buyer:changed');
+        this.events.emit(EVENT_BUYER_CHANGE, { data: this.getData() });
     }
-
     getData(): Partial<IBuyer> {
         return { ...this.data };
     }
-
     clear(): void {
         this.data = {};
-        this.events.emit('buyer:changed');
+        this.events.emit(EVENT_BUYER_CHANGE, { data: this.getData() });
     }
 
     validate(): ValidationErrors {
