@@ -10,7 +10,7 @@ export class Products implements IProducts {
 
     setItems(items: IProduct[]): void {
         this.items = [...items];
-        this.events.emit(EVENT_CATALOG_CHANGE, { items: this.items });
+        this.events.emit(EVENT_CATALOG_CHANGE);
     }
     getItems(): IProduct[] {
         return this.items;
@@ -20,7 +20,7 @@ export class Products implements IProducts {
     }
     setPreview(item: IProduct): void {
         this.preview = item;
-        this.events.emit(EVENT_PREVIEW_CHANGE, { preview: this.preview });
+        this.events.emit(EVENT_PREVIEW_CHANGE);
     }
     getPreview(): IProduct | null {
         return this.preview;

@@ -13,16 +13,16 @@ export class Basket implements IBasket {
     addItem(item: IProduct): void {
         if (!this.hasItem(item.id)) {
             this.items.push(item);
-            this.events.emit(EVENT_BASKET_CHANGE, { items: this.items });
+            this.events.emit(EVENT_BASKET_CHANGE);
         }
     }
     removeItem(item: IProduct): void {
         this.items = this.items.filter((basketItem) => basketItem.id !== item.id);
-        this.events.emit(EVENT_BASKET_CHANGE, { items: this.items });
+        this.events.emit(EVENT_BASKET_CHANGE);
     }
     clear(): void {
         this.items = [];
-        this.events.emit(EVENT_BASKET_CHANGE, { items: this.items });
+        this.events.emit(EVENT_BASKET_CHANGE);
     }
     getTotal(): number {
         return this.items.reduce((total, item) => total + (item.price ?? 0), 0);

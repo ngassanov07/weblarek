@@ -1,4 +1,4 @@
-import { IBuyer, IBuyerModel, ValidationErrors } from '../../types';
+import { IBuyer, IBuyerModel, TPayment, ValidationErrors } from '../../types';
 import { IEvents } from '../base/Events';
 import { EVENT_BUYER_CHANGE } from '../../utils/events';
 
@@ -12,14 +12,14 @@ export class Buyer implements IBuyerModel {
             ...this.data,
             ...data,
         };
-        this.events.emit(EVENT_BUYER_CHANGE, { data: this.getData() });
+        this.events.emit(EVENT_BUYER_CHANGE);
     }
     getData(): Partial<IBuyer> {
         return { ...this.data };
     }
     clear(): void {
         this.data = {};
-        this.events.emit(EVENT_BUYER_CHANGE, { data: this.getData() });
+        this.events.emit(EVENT_BUYER_CHANGE);
     }
 
     validate(): ValidationErrors {
@@ -39,5 +39,20 @@ export class Buyer implements IBuyerModel {
         }
 
         return errors;
+    }
+
+    getValidatedData(): IBuyer | null {
+        const errors = this.validate();
+        if (Object.keys(errors).length > 0) {
+            return null;
+        }
+
+        const data = this.getData();
+        return {
+            payment: data.payment as TPayment,
+            email: data.email as string,
+            phone: data.phone as string,
+            address: data.address as string,
+        };
     }
 }

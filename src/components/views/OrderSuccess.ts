@@ -3,11 +3,11 @@ import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
 import { EVENT_MODAL_CLOSE } from '../../utils/events';
 
-type OrderSuccessData = {
+export interface IOrderSuccess {
     total: number;
-};
+}
 
-export class OrderSuccess extends Component<OrderSuccessData> {
+export class OrderSuccess extends Component<IOrderSuccess> {
     protected descriptionElement: HTMLElement;
     protected closeButton: HTMLButtonElement;
 
@@ -24,10 +24,7 @@ export class OrderSuccess extends Component<OrderSuccessData> {
         });
     }
 
-    render(data?: Partial<OrderSuccessData>): HTMLElement {
-        if (data?.total !== undefined) {
-            this.descriptionElement.textContent = `Списано ${data.total} синапсов`;
-        }
-        return this.container;
+    set total(value: number) {
+        this.descriptionElement.textContent = `Списано ${value} синапсов`;
     }
 }

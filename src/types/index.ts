@@ -48,6 +48,7 @@ export interface IBuyerModel {
     getData(): Partial<IBuyer>;
     clear(): void;
     validate(): ValidationErrors;
+    getValidatedData(): IBuyer | null;
 }
 
 export interface IOrder extends IBuyer {

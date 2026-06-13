@@ -3,11 +3,11 @@ import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
 import { EVENT_BASKET_OPEN } from '../../utils/events';
 
-type HeaderData = {
+export interface IHeader {
     count: number;
-};
+}
 
-export class Header extends Component<HeaderData> {
+export class Header extends Component<IHeader> {
     protected basketButton: HTMLButtonElement;
     protected counterElement: HTMLElement;
 
@@ -24,10 +24,7 @@ export class Header extends Component<HeaderData> {
         });
     }
 
-    render(data?: Partial<HeaderData>): HTMLElement {
-        if (data?.count !== undefined) {
-            this.counterElement.textContent = String(data.count);
-        }
-        return this.container;
+    set count(value: number) {
+        this.counterElement.textContent = String(value);
     }
 }
