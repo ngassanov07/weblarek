@@ -1,12 +1,15 @@
 import { IEvents } from '../base/Events';
-import { IBuyer, TPayment } from '../../types';
+import { TPayment } from '../../types';
 import { ensureElement } from '../../utils/utils';
 import { EVENT_FORM_CHANGE, EVENT_ORDER_NEXT } from '../../utils/events';
 import { Form, IForm } from './Form';
 
-export interface IOrderForm extends IForm, Partial<IBuyer> {}
+export interface IOrderForm extends IForm {
+    payment: TPayment | null;
+    address: string;
+}
 
-export class Order extends Form {
+export class Order extends Form<IOrderForm> {
     protected cardButton: HTMLButtonElement;
     protected cashButton: HTMLButtonElement;
     protected addressInput: HTMLInputElement;
@@ -32,7 +35,7 @@ export class Order extends Form {
         this.events.emit(EVENT_ORDER_NEXT);
     }
 
-    set payment(value: TPayment | undefined) {
+    set payment(value: TPayment | null) {
         this.cardButton.classList.toggle('button_alt-active', value === 'card');
         this.cashButton.classList.toggle('button_alt-active', value === 'cash');
     }

@@ -4,7 +4,7 @@ export const EVENT_BASKET_CHANGE = 'basket:change';
 export const EVENT_BUYER_CHANGE = 'buyer:change';
 
 export const EVENT_CARD_SELECT = 'card:select';
-export const EVENT_CARD_ADD = 'card:add';
+export const EVENT_CARD_ACTION = 'card:action';
 export const EVENT_CARD_REMOVE = 'card:remove';
 export const EVENT_BASKET_OPEN = 'basket:open';
 export const EVENT_ORDER_OPEN = 'order:open';

@@ -15,12 +15,15 @@ import { Header } from './components/views/Header';
 import { Modal } from './components/views/Modal';
 import { Order } from './components/views/Order';
 import { OrderSuccess } from './components/views/OrderSuccess';
-import { IBuyer, IOrder, ValidationErrors } from './types';
+import { IBuyer, IBuyerData, IOrder, ValidationErrors } from './types';
 import { API_URL, CDN_URL } from './utils/constants';
 import {
     EVENT_BASKET_CHANGE,
     EVENT_BASKET_OPEN,
     EVENT_BUYER_CHANGE,
+    EVENT_CARD_ACTION,
+    EVENT_CARD_REMOVE,
+    EVENT_CARD_SELECT,
     EVENT_CATALOG_CHANGE,
     EVENT_FORM_CHANGE,
     EVENT_MODAL_CLOSE,
@@ -46,19 +49,7 @@ const basketView = new BasketView(cloneTemplate('#basket'), events);
 const orderForm = new Order(cloneTemplate('#order'), events);
 const contactsForm = new Contacts(cloneTemplate('#contacts'), events);
 const orderSuccess = new OrderSuccess(cloneTemplate('#success'), events);
-
-const cardPreview = new CardPreview(cloneTemplate('#card-preview'), () => {
-    const preview = products.getPreview();
-    if (!preview || preview.price === null) {
-        return;
-    }
-    if (basket.hasItem(preview.id)) {
-        basket.removeItem(preview);
-    } else {
-        basket.addItem(preview);
-    }
-    closeModal();
-});
+const cardPreview = new CardPreview(cloneTemplate('#card-preview'), events);
 
 function pickStepErrors(
     errors: ValidationErrors,
@@ -91,7 +82,7 @@ function renderCatalog(): void {
     const cards = products.getItems().map((item) => {
         const card = new CardCatalog(
             cloneTemplate<HTMLButtonElement>('#card-catalog'),
-            () => products.setPreview(item),
+            () => events.emit(EVENT_CARD_SELECT, { id: item.id }),
         );
         card.render({
             title: item.title,
@@ -126,7 +117,7 @@ function renderBasket(): void {
     const cardElements = items.map((item, index) => {
         const card = new CardBasket(
             cloneTemplate<HTMLLIElement>('#card-basket'),
-            () => basket.removeItem(item),
+            () => events.emit(EVENT_CARD_REMOVE, { id: item.id }),
         );
         card.render({
             title: item.title,
@@ -147,7 +138,7 @@ function renderOrderForm(): void {
     const errors = pickStepErrors(buyer.validate(), ['payment', 'address']);
     orderForm.render({
         payment: data.payment,
-        address: data.address ?? '',
+        address: data.address,
         errors: formatValidationErrors(errors),
         valid: isStepValid(errors),
     });
@@ -157,8 +148,8 @@ function renderContactsForm(): void {
     const data = buyer.getData();
     const errors = pickStepErrors(buyer.validate(), ['email', 'phone']);
     contactsForm.render({
-        email: data.email ?? '',
-        phone: data.phone ?? '',
+        email: data.email,
+        phone: data.phone,
         errors: formatValidationErrors(errors),
         valid: isStepValid(errors),
     });
@@ -184,10 +175,6 @@ function openContactsForm(): void {
     modal.open();
 }
 
-function closeModal(): void {
-    modal.close();
-}
-
 events.on(EVENT_CATALOG_CHANGE, () => {
     renderCatalog();
 });
@@ -210,6 +197,33 @@ events.on(EVENT_PREVIEW_CHANGE, () => {
     }
 });
 
+events.on<{ id: string }>(EVENT_CARD_SELECT, ({ id }) => {
+    const product = products.getItem(id);
+    if (product) {
+        products.setPreview(product);
+    }
+});
+
+events.on(EVENT_CARD_ACTION, () => {
+    const preview = products.getPreview();
+    if (!preview || preview.price === null) {
+        return;
+    }
+    if (basket.hasItem(preview.id)) {
+        basket.removeItem(preview);
+    } else {
+        basket.addItem(preview);
+    }
+    modal.close();
+});
+
+events.on<{ id: string }>(EVENT_CARD_REMOVE, ({ id }) => {
+    const item = products.getItem(id) ?? basket.getItems().find((product) => product.id === id);
+    if (item) {
+        basket.removeItem(item);
+    }
+});
+
 events.on(EVENT_BASKET_OPEN, () => {
     openBasket();
 });
@@ -223,13 +237,21 @@ events.on(EVENT_ORDER_NEXT, () => {
 });
 
 events.on(EVENT_ORDER_SUBMIT, async () => {
-    const buyerData = buyer.getValidatedData();
-    if (!buyerData) {
+    const errors = buyer.validate();
+    if (Object.keys(errors).length > 0) {
+        return;
+    }
+
+    const data = buyer.getData();
+    if (!data.payment) {
         return;
     }
 
     const order: IOrder = {
-        ...buyerData,
+        payment: data.payment,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
         items: basket.getItems().map((item) => item.id),
         total: basket.getTotal(),
     };
@@ -243,10 +265,10 @@ events.on(EVENT_ORDER_SUBMIT, async () => {
         modal.open();
     } catch (error) {
         console.error(error);
-        const data = buyer.getData();
+        const buyerData = buyer.getData();
         contactsForm.render({
-            email: data.email ?? '',
-            phone: data.phone ?? '',
+            email: buyerData.email,
+            phone: buyerData.phone,
             errors: 'Не удалось оформить заказ. Попробуйте ещё раз.',
             valid: false,
         });
@@ -254,12 +276,12 @@ events.on(EVENT_ORDER_SUBMIT, async () => {
     }
 });
 
-events.on<Partial<IBuyer>>(EVENT_FORM_CHANGE, (data) => {
+events.on<Partial<IBuyerData>>(EVENT_FORM_CHANGE, (data) => {
     buyer.setData(data);
 });
 
 events.on(EVENT_MODAL_CLOSE, () => {
-    closeModal();
+    modal.close();
 });
 
 basket.clear();

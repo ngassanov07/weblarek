@@ -97,6 +97,12 @@ Presenter - слой логики, связывает данные и предс
 - `phone: string`
 - `address: string`
 
+`IBuyerData` - данные покупателя в модели:
+- `payment: TPayment | null`
+- `email: string`
+- `phone: string`
+- `address: string`
+
 `ValidationErrors` - тип объекта ошибок валидации. Построен на основе полей `IBuyer`, поэтому автоматически остается связанным с типом покупателя.
 
 `IOrder` - интерфейс заказа:
@@ -199,15 +205,14 @@ Presenter - слой логики, связывает данные и предс
 `constructor(events: IEvents)`
 
 Поля:
-- `data: Partial<IBuyer>` — данные покупателя
+- `data: IBuyerData` — данные покупателя
 - `events: IEvents` — брокер событий
 
 Методы:
-- `setData(data: Partial<IBuyer>): void`
-- `getData(): Partial<IBuyer>`
+- `setData(data: Partial<IBuyerData>): void`
+- `getData(): IBuyerData`
 - `clear(): void`
 - `validate(): ValidationErrors`
-- `getValidatedData(): IBuyer | null`
 
 При изменении данных генерирует событие `buyer:change`.
 
@@ -278,7 +283,7 @@ Presenter - слой логики, связывает данные и предс
 - `setCategory(category: string): void`
 - `render(data?: Partial<CardData & { id: string; category: string; image: string; description: string; inBasket: boolean }>): HTMLElement`
 
-Генерирует события `card:add` и `card:remove` при нажатии на кнопку покупки.
+Генерирует событие `card:action` при нажатии на кнопку покупки.
 
 ### Класс CardBasket
 
@@ -440,13 +445,16 @@ Presenter - слой логики, связывает данные и предс
 ### События представления
 
 - `basket:open` — нажата кнопка открытия корзины
+- `card:select` — выбрана карточка для просмотра. Данные: `{ id: string }`
+- `card:action` — нажата кнопка покупки в карточке предпросмотра
+- `card:remove` — нажата кнопка удаления товара. Данные: `{ id: string }`
 - `order:open` — нажата кнопка оформления заказа
 - `order:next` — нажата кнопка перехода ко второй форме
 - `order:submit` — нажата кнопка оплаты
 - `form:change` — изменены данные в форме. Данные: `Partial<IBuyer>`
 - `modal:close` — закрыто модальное окно
 
-Действия карточек товаров обрабатываются через колбэки, переданные в конструктор из презентера.
+Действия карточек каталога и корзины обрабатываются через колбэки, эмитирующие события из презентера.
 
 ## Презентер
 
@@ -460,7 +468,7 @@ Presenter - слой логики, связывает данные и предс
 - открывает модальные окна, передавая актуальную разметку представлений;
 - не генерирует события и не хранит состояние приложения.
 
-Валидация выполняется через `buyer.validate()`. Для отправки заказа используется `buyer.getValidatedData()`.
+Валидация выполняется через `buyer.validate()`. Для отправки заказа презентер проверяет результат `validate()` и берёт данные через `getData()`.
 
 При запуске приложения презентер инициализирует модели через `basket.clear()` и `buyer.clear()`, затем загружает каталог товаров с сервера.
 

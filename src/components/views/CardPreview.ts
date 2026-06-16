@@ -1,5 +1,7 @@
+import { IEvents } from '../base/Events';
 import { categoryMap } from '../../utils/constants';
 import { ensureElement } from '../../utils/utils';
+import { EVENT_CARD_ACTION } from '../../utils/events';
 import { Card, ICard } from './Card';
 
 export interface ICardPreview extends ICard {
@@ -18,7 +20,7 @@ export class CardPreview extends Card {
 
     constructor(
         container: HTMLElement,
-        protected readonly onClick: () => void,
+        protected readonly events: IEvents,
     ) {
         super(container);
         this.categoryElement = ensureElement<HTMLElement>('.card__category', container);
@@ -28,7 +30,7 @@ export class CardPreview extends Card {
 
         this.buttonElement.addEventListener('click', () => {
             if (!this.buttonElement.disabled) {
-                this.onClick();
+                this.events.emit(EVENT_CARD_ACTION);
             }
         });
     }

@@ -23,6 +23,13 @@ export interface IBuyer {
     address: string;
 }
 
+export interface IBuyerData {
+    payment: TPayment | null;
+    email: string;
+    phone: string;
+    address: string;
+}
+
 export type ValidationErrors = Partial<Record<keyof IBuyer, string>>;
 
 export interface IProducts {
@@ -44,11 +51,10 @@ export interface IBasket {
 }
 
 export interface IBuyerModel {
-    setData(data: Partial<IBuyer>): void;
-    getData(): Partial<IBuyer>;
+    setData(data: Partial<IBuyerData>): void;
+    getData(): IBuyerData;
     clear(): void;
     validate(): ValidationErrors;
-    getValidatedData(): IBuyer | null;
 }
 
 export interface IOrder extends IBuyer {

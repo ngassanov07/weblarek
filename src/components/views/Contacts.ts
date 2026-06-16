@@ -1,12 +1,14 @@
 import { IEvents } from '../base/Events';
-import { IBuyer } from '../../types';
 import { ensureElement } from '../../utils/utils';
 import { EVENT_FORM_CHANGE, EVENT_ORDER_SUBMIT } from '../../utils/events';
 import { Form, IForm } from './Form';
 
-export interface IContactsForm extends IForm, Partial<IBuyer> {}
+export interface IContactsForm extends IForm {
+    email: string;
+    phone: string;
+}
 
-export class Contacts extends Form {
+export class Contacts extends Form<IContactsForm> {
     protected emailInput: HTMLInputElement;
     protected phoneInput: HTMLInputElement;
 

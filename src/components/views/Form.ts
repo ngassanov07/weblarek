@@ -7,7 +7,7 @@ export interface IForm {
     valid: boolean;
 }
 
-export abstract class Form extends Component<IForm> {
+export abstract class Form<T extends IForm = IForm> extends Component<T> {
     protected submitButton: HTMLButtonElement;
     protected errorsElement: HTMLElement;
 

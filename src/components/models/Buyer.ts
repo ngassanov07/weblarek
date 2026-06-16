@@ -1,24 +1,33 @@
-import { IBuyer, IBuyerModel, TPayment, ValidationErrors } from '../../types';
+import { IBuyerData, IBuyerModel, ValidationErrors } from '../../types';
 import { IEvents } from '../base/Events';
 import { EVENT_BUYER_CHANGE } from '../../utils/events';
 
+const INITIAL_DATA: IBuyerData = {
+    payment: null,
+    email: '',
+    phone: '',
+    address: '',
+};
+
 export class Buyer implements IBuyerModel {
-    protected data: Partial<IBuyer> = {};
+    protected data: IBuyerData = { ...INITIAL_DATA };
 
     constructor(protected readonly events: IEvents) {}
 
-    setData(data: Partial<IBuyer>): void {
+    setData(data: Partial<IBuyerData>): void {
         this.data = {
             ...this.data,
             ...data,
         };
         this.events.emit(EVENT_BUYER_CHANGE);
     }
-    getData(): Partial<IBuyer> {
+
+    getData(): IBuyerData {
         return { ...this.data };
     }
+
     clear(): void {
-        this.data = {};
+        this.data = { ...INITIAL_DATA };
         this.events.emit(EVENT_BUYER_CHANGE);
     }
 
@@ -28,31 +37,16 @@ export class Buyer implements IBuyerModel {
         if (!this.data.payment) {
             errors.payment = 'Не выбран вид оплаты';
         }
-        if (!this.data.address?.trim()) {
+        if (!this.data.address.trim()) {
             errors.address = 'Укажите адрес доставки';
         }
-        if (!this.data.email?.trim()) {
+        if (!this.data.email.trim()) {
             errors.email = 'Укажите email';
         }
-        if (!this.data.phone?.trim()) {
+        if (!this.data.phone.trim()) {
             errors.phone = 'Укажите телефон';
         }
 
         return errors;
-    }
-
-    getValidatedData(): IBuyer | null {
-        const errors = this.validate();
-        if (Object.keys(errors).length > 0) {
-            return null;
-        }
-
-        const data = this.getData();
-        return {
-            payment: data.payment as TPayment,
-            email: data.email as string,
-            phone: data.phone as string,
-            address: data.address as string,
-        };
     }
 }
